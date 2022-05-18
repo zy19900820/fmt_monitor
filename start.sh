@@ -1,0 +1,1 @@
+nohup ./ftm_monitor& 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"golang.org/x/xerrors"
 )
@@ -72,7 +73,7 @@ func getFMTOkPrice() (float64, error) {
 		return 0, err
 	}
 
-	log.Print("Response: ", string(body))
+	//log.Print("Response: ", string(body))
 	var priceInfo OK_PRICE_INFO
 	err = json.Unmarshal(body, &priceInfo)
 	if err != nil {
@@ -94,11 +95,37 @@ func getFMTOkPrice() (float64, error) {
 }
 
 func main() {
-	price, err := getFMTOkPrice()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	log.Println(price)
-}
+	for {
+		time.Sleep(time.Duration(10 * time.Second))
+		price1, err := getFMTBinancePrice(SPOT_URL)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 
+		price2, err := getFMTBinancePrice(SPOT_URL)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		price3, err := getFMTOkPrice()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		var lowPrice float64
+		var highPrice float64
+		if price2 < price1 {
+			lowPrice = price2
+			highPrice = price1
+		}
+		if price3 < price1 {
+			lowPrice = price3
+			highPrice = price1
+		}
+		log.Println(lowPrice)
+		log.Println(highPrice)
+	}
+}
